@@ -9,18 +9,6 @@
  ****************/
 
 require('connect.php');
-require('authenticate.php');
-
-if (
-    !isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])
-    || ($_SERVER['PHP_AUTH_USER'] != ADMIN_LOGIN)
-    || ($_SERVER['PHP_AUTH_PW'] != ADMIN_PASSWORD)
-) {
-    header('HTTP/1.1 401 Unauthorized');
-    header('WWW-Authenticate: Basic realm="Our Blog"');
-    exit("Access Denied: Username and password required.");
-}
-
 
 // Fetch post details from the database
 $stmt = $db->prepare('SELECT * FROM posts WHERE id = :id');
@@ -66,14 +54,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
     <!-- Remember that alternative syntax is good and html inside php is bad -->
-    <h1>Edit Post</h1>
-    <form action="" method="post">
-        <label for="title">Title:</label><br>
-        <input type="text" id="title" name="title" value="<?= $post['title'] ?>"><br>
-        <label for="content">Content:</label><br>
-        <textarea id="content" name="content"><?= $post['content'] ?></textarea><br>
-        <button type="submit">Save Changes</button>
-    </form>
+    <div id="container">
+        <div id="container1">
+            <h1>Toomblr - Edit Blog Post</h1>
+            <a href="index.php"><button id="home" type="button">Home</button></a>
+            <a href="post.php"><button id="post" type="button">New Post</button></a>
+            <div id="container2">
+                <fieldset>
+                    <legend>Edit Blog Post</legend>
+                    <form action="" method="post">
+                        <label for="title">Title:</label><br>
+                        <input type="text" id="title" name="title"><br>
+                        <label for="content">Content:</label><br>
+                        <textarea id="content" name="content" style="resize:none"></textarea><br>
+                        <button type="submit" onclick="return confirm('Are you sure?')">Update</button>
+                        <button type="submit" formaction="delete.php?id=<?php echo $post['id']; ?>">Delete</button>
+                    </form>
+                </fieldset>
+            </div>
+            <p>Copywrong 2024 - No Rights Reserved</p>
+        </div>
+    </div>
 </body>
 
 </html>

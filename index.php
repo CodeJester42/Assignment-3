@@ -21,6 +21,8 @@ if (
     exit("Access Denied: Username and password required.");
 }
 
+$stmt = $db->query('SELECT * FROM posts ORDER BY timestamp DESC');
+$posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 
@@ -37,25 +39,27 @@ if (
 
 <body>
     <!-- Remember that alternative syntax is good and html inside php is bad -->
-    <h1>Blog</h1>
-    <?php
-    // Include database connection
-    require_once('connect.php');
 
-    // Fetch posts from the database
-    $stmt = $db->query('SELECT * FROM posts ORDER BY timestamp DESC');
-    $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Display posts
-    foreach ($posts as $post) {
-        echo "<div>";
-        echo "<h2>{$post['title']}</h2>";
-        echo "<p>{$post['content']}</p>";
-        echo "<a href='edit.php?id={$post['id']}'>Edit</a>";
-        echo "</div>";
-    }
-    ?>
-    <a href="post.php">Create New Post</a>
+    <div id="container">
+        <div id="container1">
+            <h1>Stung Eye - Index</h1>
+            <a href="index.php"><button id="home" type="button">Home</button></a>
+            <a href="post.php"><button id="post" type="button">New Post</button></a>
+            <div id="container2">
+                <?php
+                foreach ($posts as $post) {
+                    echo "<div>";
+                    echo "<h2>{$post['title']}</h2>";
+                    echo "<p>{$post['content']}</p>";
+                    echo "<a href='edit.php?id={$post['id']}'>Edit</a>";
+                    echo "</div>";
+                }
+                ?>
+            </div>
+            <p>Copywrong 2024 - No Rights Reserved</p>
+        </div>
+    </div>
 </body>
 
 </html>
