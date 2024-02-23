@@ -2,41 +2,57 @@
 
 /*******w******** 
     
-    Name:
-    Date:
-    Description:
+    Name: Neal Fernandez
+    Date: February 22, 2024
+    Description: Assignment 3 - Blog
 
  ****************/
 
 require('connect.php');
+require('authenticate.php');
 
-// Fetch post details from the database
-$stmt = $db->prepare('SELECT * FROM posts WHERE id = :id');
-$stmt->bindParam(':id', $_GET['id']);
-$stmt->execute();
-$post = $stmt->fetch(PDO::FETCH_ASSOC);
-
-// Check if post exists
-if (!$post) {
-    echo "Post not found";
-    exit;
-}
-
-// Handle form submission for editing
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title = $_POST['title'];
-    $content = $_POST['content'];
+    if (isset($_POST['delete'])) {
+        // Delete the post
+        $stmt = $db->prepare('DELETE FROM posts WHERE id = :id');
+        $stmt->bindParam(':id', $_GET['id']);
+        $stmt->execute();
 
-    // Update the post in the database
-    $stmt = $db->prepare('UPDATE posts SET title = :title, content = :content WHERE id = :id');
-    $stmt->bindParam(':title', $title);
-    $stmt->bindParam(':content', $content);
+        // Redirect to index.php after deletion
+        header('Location: index.php');
+        exit;
+    } else {
+        // Handle form submission for editing
+        $title = $_POST['title'];
+        $content = $_POST['content'];
+
+        if (strlen($title) < 1 || strlen($content) < 1) {
+            // Redirect back to the form with an error message if title or content is empty
+            header("Location: edit.php?id={$_GET['id']}&error=empty");
+            exit;
+        }
+
+        // Update the post in the database
+        $stmt = $db->prepare('UPDATE posts SET title = :title, content = :content WHERE id = :id');
+        $stmt->bindParam(':title', $title);
+        $stmt->bindParam(':content', $content);
+        $stmt->bindParam(':id', $_GET['id']);
+        $stmt->execute();
+
+        // Redirect to index.php after editing
+        header('Location: index.php');
+        exit;
+    }
+} else {
+    $stmt = $db->prepare('SELECT * FROM posts WHERE id = :id');
     $stmt->bindParam(':id', $_GET['id']);
     $stmt->execute();
+    $post = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Redirect to index.php after editing
-    header('Location: index.php');
-    exit;
+    if (!$post) {
+        echo "Post not found";
+        exit;
+    }
 }
 
 ?>
@@ -56,23 +72,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Remember that alternative syntax is good and html inside php is bad -->
     <div id="container">
         <div id="container1">
-            <h1>Toomblr - Edit Blog Post</h1>
+            <div id="container1-1">
+                <h1>Stung Eye - Edit Blog Post</h1>
+            </div>
             <a href="index.php"><button id="home" type="button">Home</button></a>
             <a href="post.php"><button id="post" type="button">New Post</button></a>
             <div id="container2">
                 <fieldset>
                     <legend>Edit Blog Post</legend>
                     <form action="" method="post">
-                        <label for="title">Title:</label><br>
-                        <input type="text" id="title" name="title"><br>
-                        <label for="content">Content:</label><br>
-                        <textarea id="content" name="content" style="resize:none"></textarea><br>
-                        <button type="submit" onclick="return confirm('Are you sure?')">Update</button>
-                        <button type="submit" formaction="delete.php?id=<?php echo $post['id']; ?>">Delete</button>
+                        <div id="form-title">
+                            <label for="title">Title:</label><br>
+                            <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($post['title']); ?>"><br>
+                        </div>
+                        <div id="form-content">
+                            <label for="content">Content:</label><br>
+                            <textarea id="content" name="content" style="resize:none"><?php echo htmlspecialchars($post['content']); ?></textarea><br>
+                        </div>
+                        <div id="form-button">
+                            <button type="submit" redirect="index.php">Update</button>
+                            <button type="submit" name="delete" value="delete" onclick="return confirm('Are you sure you want to delete this post?')">Delete</button>
+                        </div>
                     </form>
                 </fieldset>
             </div>
-            <p>Copywrong 2024 - No Rights Reserved</p>
+            <p id='copyright'>Copywrong 2024 - No Rights Reserved</p>
         </div>
     </div>
 </body>
